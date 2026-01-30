@@ -20,14 +20,28 @@ interface EncryptTabProps {
 
 // 加密信息组件
 const EncryptionInfo: React.FC<{ timeSlot: number }> = ({ timeSlot }) => {
-  const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining(timeSlot))
   const expired = isExpired(timeSlot)
+  const [timeRemaining, setTimeRemaining] = useState(() => getTimeRemaining(timeSlot))
 
+  // 当 timeSlot 变化时，重置倒计时
   useEffect(() => {
-    if (expired) return
+    setTimeRemaining(getTimeRemaining(timeSlot))
+  }, [timeSlot])
+
+  // 定时更新剩余时间
+  useEffect(() => {
+    if (expired) {
+      setTimeRemaining('EXPIRED')
+      return
+    }
 
     const interval = setInterval(() => {
-      setTimeRemaining(getTimeRemaining(timeSlot))
+      const remaining = getTimeRemaining(timeSlot)
+      setTimeRemaining(remaining)
+      // 如果过期了，停止定时器
+      if (remaining === 'EXPIRED') {
+        clearInterval(interval)
+      }
     }, 1000)
 
     return () => clearInterval(interval)
