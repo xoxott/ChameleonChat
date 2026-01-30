@@ -66,7 +66,7 @@ export async function aesEncrypt(key: CryptoKey, plaintext: string): Promise<Cip
   const encrypted = await crypto.subtle.encrypt(
     {
       name: "AES-GCM",
-      iv: iv,
+      iv: iv as BufferSource, 
     },
     key,
     encoder.encode(plaintext)
@@ -97,7 +97,7 @@ export async function aesDecrypt(key: CryptoKey, cipherObj: CipherObject): Promi
   const decrypted = await crypto.subtle.decrypt(
     {
       name: "AES-GCM",
-      iv: iv,
+      iv: iv as BufferSource, 
     },
     key,
     encrypted
