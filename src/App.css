@@ -84,7 +84,7 @@
 
 .app-header {
   text-align: center;
-  padding: 2rem 1rem;
+  padding: 1rem 0.5rem;
   background: rgba(0, 0, 0, 0.8);
   border-bottom: 2px solid #00ff41;
   box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
@@ -103,19 +103,20 @@
 
 .terminal-title h1 {
   margin: 0;
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   font-weight: normal;
   text-shadow: 
     0 0 10px #00ff41,
     0 0 20px #00ff41,
     0 0 30px #00ff41;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.15em;
   color: #00ff41;
+  line-height: 1.2;
 }
 
 .subtitle {
-  margin: 0.5rem 0;
-  font-size: 1rem;
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
   color: #00ff88;
   letter-spacing: 0.1em;
 }
@@ -123,9 +124,9 @@
 .status-bar {
   display: flex;
   justify-content: center;
-  gap: 2rem;
-  margin-top: 1rem;
-  font-size: 0.85rem;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
   flex-wrap: wrap;
 }
 
@@ -145,7 +146,7 @@
   justify-content: center;
   gap: 0;
   padding: 0 1rem;
-  margin: 1rem auto 0;
+  margin: 0.5rem auto 0;
   max-width: 1200px;
   width: 100%;
   flex-shrink: 0; /* 防止 tabs 被压缩 */
@@ -154,13 +155,13 @@
 .tab {
   flex: 1;
   max-width: 300px;
-  padding: 1rem 2rem;
+  padding: 0.75rem 1.5rem;
   background: rgba(0, 0, 0, 0.6);
   border: 2px solid #00ff41;
   border-bottom: none;
   color: #00ff88;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 1rem;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s;
   text-transform: uppercase;
@@ -216,23 +217,23 @@
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0.5rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
   min-height: 0; /* 允许 flex 子元素缩小 */
   overflow: hidden; /* 防止溢出 */
 }
 
 .messages {
   flex: 1;
-  padding: 1.5rem;
+  padding: 1rem;
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0; /* 允许 flex 子元素缩小 */
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .messages::-webkit-scrollbar {
@@ -398,7 +399,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: 0.75rem;
   flex-shrink: 0; /* 防止输入区域被压缩 */
 }
 
@@ -623,17 +624,25 @@
 
 /* 加密工具容器 */
 .encrypt-container {
+  flex: 1;
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0.5rem 1rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 0.75rem;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .encrypt-section {
-  padding: 1.5rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .section-header {
@@ -652,7 +661,10 @@
 .section-body {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .button-group {
@@ -746,12 +758,14 @@
 }
 
 .output-box {
-  min-height: 150px;
-  padding: 1rem;
+  min-height: 100px;
+  max-height: 200px;
+  padding: 0.75rem;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid #00ff41;
   border-radius: 4px;
   overflow-y: auto;
+  flex-shrink: 0;
 }
 
 .output-box pre {
@@ -763,30 +777,33 @@
 /* 移动端适配 */
 @media (max-width: 768px) {
   .app-header {
-    padding: 1rem 0.5rem;
+    padding: 0.75rem 0.5rem;
   }
   
   .terminal-title {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem;
+    margin-bottom: 0.25rem;
   }
   
   .terminal-title h1 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     letter-spacing: 0.1em;
-    line-height: 1.3;
+    line-height: 1.2;
   }
   
   .subtitle {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     padding: 0 0.5rem;
+    margin: 0.15rem 0;
   }
   
   .status-bar {
     flex-direction: column;
-    gap: 0.5rem;
-    font-size: 0.75rem;
+    gap: 0.25rem;
+    font-size: 0.7rem;
     padding: 0 0.5rem;
+    margin-top: 0.25rem;
   }
   
   .status-item {
@@ -797,24 +814,25 @@
     flex-direction: row;
     padding: 0 0.5rem;
     gap: 0.5rem;
+    margin: 0.25rem auto 0;
   }
   
   .tab {
     flex: 1;
-    padding: 0.75rem 0.5rem;
-    font-size: 0.85rem;
+    padding: 0.6rem 0.5rem;
+    font-size: 0.8rem;
     max-width: none;
   }
   
   .chat-container {
     padding: 0.5rem;
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
   
   .messages {
     min-height: 0; /* 允许 flex 子元素缩小 */
-    padding: 1rem 0.75rem;
-    gap: 0.75rem;
+    padding: 0.75rem 0.5rem;
+    gap: 0.5rem;
   }
   
   .message-content {
@@ -865,11 +883,21 @@
   .encrypt-container {
     grid-template-columns: 1fr;
     padding: 0.5rem;
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
   
   .encrypt-section {
-    padding: 1rem;
+    padding: 0.75rem;
+  }
+  
+  .section-body {
+    gap: 0.5rem;
+  }
+  
+  .output-box {
+    min-height: 80px;
+    max-height: 150px;
+    padding: 0.5rem;
   }
   
   .section-title {
