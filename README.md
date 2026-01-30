@@ -53,6 +53,19 @@ npm run preview
 
 ### 手动部署
 
+**一键部署（推荐）**:
+```bash
+npm run deploy
+```
+
+这个命令会：
+1. 自动构建项目
+2. 检查 Git 状态和分支
+3. 如果有未提交的更改，自动提交
+4. 自动推送到 GitHub
+5. 触发 GitHub Actions 自动部署
+
+**手动部署步骤**:
 1. **构建项目**:
    ```bash
    npm run build
@@ -60,14 +73,6 @@ npm run preview
 
 2. **推送到 GitHub**:
    ```bash
-   git add .
-   git commit -m "Deploy to GitHub Pages"
-   git push origin master
-   ```
-
-3. **或者使用 deploy 命令**:
-   ```bash
-   npm run deploy
    git add .
    git commit -m "Deploy to GitHub Pages"
    git push origin master
