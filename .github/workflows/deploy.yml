@@ -11,9 +11,10 @@ permissions:
   pages: write
   id-token: write
 
+# 确保同一时间只有一个部署任务运行
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true  # 取消正在进行的部署，使用最新的
 
 jobs:
   build:
