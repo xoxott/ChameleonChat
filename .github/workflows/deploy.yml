@@ -39,9 +39,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: |
-          echo "Starting build process..."
-          pnpm run build 2>&1 | tee build.log || (cat build.log && exit 1)
+        run: pnpm run build
         env:
           NODE_ENV: production
 
