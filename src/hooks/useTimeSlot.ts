@@ -21,16 +21,10 @@ export function useTimeSlot(initialTimeSlot: number) {
     return () => clearInterval(interval)
   }, [manualTimeSlot])
 
-  const resetToAuto = () => {
-    setManualTimeSlot(null)
-    setTimeSlot(getCurrentTimeSlot())
-  }
-
   return {
     timeSlot,
     manualTimeSlot,
     setTimeSlot,
-    setManualTimeSlot,
-    resetToAuto
+    setManualTimeSlot
   }
 }

@@ -39,7 +39,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: pnpm run build
+        run: |
+          echo "Starting build process..."
+          pnpm run build 2>&1 | tee build.log || (cat build.log && exit 1)
+        env:
+          NODE_ENV: production
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
