@@ -702,6 +702,25 @@
   line-height: 1.5;
 }
 
+.expiry-warning {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid #ff4444;
+  border-radius: 4px;
+}
+
+.warning-text {
+  color: #ff4444;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.time-value.expired {
+  color: #ff4444;
+  text-shadow: 0 0 5px rgba(255, 68, 68, 0.5);
+}
+
 .copy-btn {
   padding: 0.5rem 1rem;
   background: rgba(0, 255, 65, 0.1);

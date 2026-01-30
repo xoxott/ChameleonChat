@@ -1,0 +1,26 @@
+// 默认配置值
+export const DEFAULT_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+export const DEFAULT_PASSPHRASE = 'default passphrase'
+export const DEFAULT_TIME_SLOT = Math.floor(Date.now() / (1000 * 60)) // 每分钟一个时间槽
+
+// 工具函数
+export const getCurrentTimeSlot = () => Math.floor(Date.now() / (1000 * 60))
+
+export const formatTime = (timeSlot: number) => new Date(timeSlot * 60 * 1000).toLocaleString()
+
+export const getExpiryTime = (timeSlot: number) => new Date((timeSlot + 1) * 60 * 1000).toLocaleString()
+
+export const isExpired = (timeSlot: number) => {
+  const currentTimeSlot = getCurrentTimeSlot()
+  return currentTimeSlot > timeSlot
+}
+
+export const getTimeRemaining = (timeSlot: number) => {
+  const expiryTime = (timeSlot + 1) * 60 * 1000
+  const now = Date.now()
+  const remaining = expiryTime - now
+  if (remaining <= 0) return 'EXPIRED'
+  const seconds = Math.floor(remaining / 1000)
+  const minutes = Math.floor(seconds / 60)
+  return `${minutes}m ${seconds % 60}s`
+}
