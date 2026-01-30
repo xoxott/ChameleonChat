@@ -43,6 +43,7 @@ function App() {
   const [encryptInput, setEncryptInput] = useState('')
   const [encryptOutput, setEncryptOutput] = useState('')
   const [encryptTimeSlot, setEncryptTimeSlot] = useState<number | null>(null)
+  const [encryptTimestamp, setEncryptTimestamp] = useState<number | null>(null) // 实际加密时间戳
   const [decryptInput, setDecryptInput] = useState('')
   const [decryptOutput, setDecryptOutput] = useState('')
   const [encryptMsgIndex, setEncryptMsgIndex] = useState(0)
@@ -136,6 +137,7 @@ function App() {
     setIsProcessing(true)
     try {
       const currentTimeSlot = getCurrentTimeSlot()
+      const encryptTime = Date.now() // 记录实际加密时间戳
       const encrypted = await encryptTextToChat({
         mnemonic: config.mnemonic,
         passphrase: config.passphrase,
@@ -145,6 +147,7 @@ function App() {
       })
       setEncryptOutput(encrypted)
       setEncryptTimeSlot(currentTimeSlot)
+      setEncryptTimestamp(encryptTime) // 记录加密时间戳
       setEncryptMsgIndex(encryptMsgIndex + 1)
     } catch (error) {
       setEncryptOutput(`>>> ERROR: ${error instanceof Error ? error.message : 'UNKNOWN ERROR'}`)
@@ -250,6 +253,7 @@ function App() {
           encryptInput={encryptInput}
           encryptOutput={encryptOutput}
           encryptTimeSlot={encryptTimeSlot}
+          encryptTimestamp={encryptTimestamp}
           decryptInput={decryptInput}
           decryptOutput={decryptOutput}
           timeSlot={timeSlot}
@@ -262,6 +266,7 @@ function App() {
             setEncryptInput('')
             setEncryptOutput('')
             setEncryptTimeSlot(null)
+            setEncryptTimestamp(null)
           }}
           onClearDecrypt={() => {
             setDecryptInput('')

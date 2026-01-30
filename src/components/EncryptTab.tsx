@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { formatTime, getExpiryTime, getCurrentTimeSlot, isExpired, getTimeRemaining } from '../constants'
+import { 
+  formatTimeFromTimestamp, 
+  getExpiryTimeFromTimestamp, 
+  getCurrentTimeSlot, 
+  isExpiredFromTimestamp, 
+  getTimeRemainingFromTimestamp 
+} from '../constants'
 
 interface EncryptTabProps {
   encryptInput: string
   encryptOutput: string
   encryptTimeSlot: number | null
+  encryptTimestamp: number | null
   decryptInput: string
   decryptOutput: string
   timeSlot: number
@@ -19,14 +26,14 @@ interface EncryptTabProps {
 }
 
 // 加密信息组件
-const EncryptionInfo: React.FC<{ timeSlot: number }> = ({ timeSlot }) => {
-  const expired = isExpired(timeSlot)
-  const [timeRemaining, setTimeRemaining] = useState(() => getTimeRemaining(timeSlot))
+const EncryptionInfo: React.FC<{ timeSlot: number; encryptTimestamp: number }> = ({ timeSlot, encryptTimestamp }) => {
+  const expired = isExpiredFromTimestamp(encryptTimestamp)
+  const [timeRemaining, setTimeRemaining] = useState(() => getTimeRemainingFromTimestamp(encryptTimestamp))
 
-  // 当 timeSlot 变化时，重置倒计时
+  // 当 encryptTimestamp 变化时，重置倒计时
   useEffect(() => {
-    setTimeRemaining(getTimeRemaining(timeSlot))
-  }, [timeSlot])
+    setTimeRemaining(getTimeRemainingFromTimestamp(encryptTimestamp))
+  }, [encryptTimestamp])
 
   // 定时更新剩余时间
   useEffect(() => {
@@ -36,7 +43,7 @@ const EncryptionInfo: React.FC<{ timeSlot: number }> = ({ timeSlot }) => {
     }
 
     const interval = setInterval(() => {
-      const remaining = getTimeRemaining(timeSlot)
+      const remaining = getTimeRemainingFromTimestamp(encryptTimestamp)
       setTimeRemaining(remaining)
       // 如果过期了，停止定时器
       if (remaining === 'EXPIRED') {
@@ -45,18 +52,18 @@ const EncryptionInfo: React.FC<{ timeSlot: number }> = ({ timeSlot }) => {
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [timeSlot, expired])
+  }, [encryptTimestamp, expired])
 
   return (
     <div className="time-slot-info">
       <div className="time-slot-display">
         <span className="terminal-label">ENCRYPTION TIME:</span>
-        <span className="time-value">{formatTime(timeSlot)}</span>
+        <span className="time-value">{formatTimeFromTimestamp(encryptTimestamp)}</span>
       </div>
       <div className="time-slot-display">
         <span className="terminal-label">EXPIRES AT:</span>
         <span className={`time-value ${expired ? 'expired' : ''}`}>
-          {getExpiryTime(timeSlot)}
+          {getExpiryTimeFromTimestamp(encryptTimestamp)}
         </span>
       </div>
       <div className="time-slot-display">
@@ -83,7 +90,7 @@ const EncryptionInfo: React.FC<{ timeSlot: number }> = ({ timeSlot }) => {
           </>
         ) : (
           <>
-            This message will expire at {getExpiryTime(timeSlot)}. After expiration, it cannot be decrypted.
+            This message will expire at {getExpiryTimeFromTimestamp(encryptTimestamp)}. After expiration, it cannot be decrypted.
             <br />
             <strong>Note:</strong> Each encryption of the same text produces different encrypted output due to different time slots and message indices.
           </>
@@ -97,6 +104,7 @@ export const EncryptTab: React.FC<EncryptTabProps> = ({
   encryptInput,
   encryptOutput,
   encryptTimeSlot,
+  encryptTimestamp,
   decryptInput,
   decryptOutput,
   timeSlot,
@@ -148,8 +156,8 @@ export const EncryptTab: React.FC<EncryptTabProps> = ({
               </button>
             )}
           </div>
-          {encryptTimeSlot !== null && (
-            <EncryptionInfo timeSlot={encryptTimeSlot} />
+          {encryptTimeSlot !== null && encryptTimestamp !== null && (
+            <EncryptionInfo timeSlot={encryptTimeSlot} encryptTimestamp={encryptTimestamp} />
           )}
           <div className="output-box">
             <pre className="terminal-text">{encryptOutput || '>>> Waiting for input...'}</pre>
