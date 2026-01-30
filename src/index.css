@@ -1,0 +1,54 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #0a0a0a;
+  color: #00ff41;
+  overflow: hidden; /* 防止页面滚动 */
+  height: 100vh;
+  max-height: 100vh;
+}
+
+html {
+  height: 100%;
+  max-height: 100vh;
+  overflow: hidden; /* 防止页面滚动 */
+}
+
+#root {
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden; /* 防止页面滚动 */
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  html {
+    height: -webkit-fill-available;
+  }
+  
+  body {
+    min-height: -webkit-fill-available; /* iOS Safari 支持 */
+  }
+  
+  #root {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* 选择文本样式 */
+::selection {
+  background: rgba(0, 255, 65, 0.3);
+  color: #00ff41;
+}
+
+::-moz-selection {
+  background: rgba(0, 255, 65, 0.3);
+  color: #00ff41;
+}
