@@ -6,6 +6,14 @@ export default defineConfig({
   plugins: [react()],
   base: '/ChameleonChat/',
   build: {
-    outDir: 'dist'
-  }
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
+  },
+  publicDir: 'public'
 })
