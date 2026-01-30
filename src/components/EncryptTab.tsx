@@ -12,6 +12,7 @@ interface EncryptTabProps {
   encryptOutput: string
   encryptTimeSlot: number | null
   encryptTimestamp: number | null
+  encryptMsgIndexUsed: number | null
   decryptInput: string
   decryptOutput: string
   timeSlot: number
@@ -26,7 +27,11 @@ interface EncryptTabProps {
 }
 
 // 加密信息组件
-const EncryptionInfo: React.FC<{ timeSlot: number; encryptTimestamp: number }> = ({ timeSlot, encryptTimestamp }) => {
+const EncryptionInfo: React.FC<{ 
+  timeSlot: number
+  encryptTimestamp: number
+  msgIndex: number | null
+}> = ({ timeSlot, encryptTimestamp, msgIndex }) => {
   const expired = isExpiredFromTimestamp(encryptTimestamp)
   const [timeRemaining, setTimeRemaining] = useState(() => getTimeRemainingFromTimestamp(encryptTimestamp))
 
@@ -70,6 +75,12 @@ const EncryptionInfo: React.FC<{ timeSlot: number; encryptTimestamp: number }> =
         <span className="terminal-label">TIME_SLOT:</span>
         <span className="time-value">{timeSlot}</span>
       </div>
+      {msgIndex !== null && (
+        <div className="time-slot-display">
+          <span className="terminal-label">MSG_INDEX:</span>
+          <span className="time-value">{msgIndex}</span>
+        </div>
+      )}
       {!expired && (
         <div className="time-slot-display">
           <span className="terminal-label">TIME REMAINING:</span>
@@ -90,7 +101,9 @@ const EncryptionInfo: React.FC<{ timeSlot: number; encryptTimestamp: number }> =
           </>
         ) : (
           <>
-            This message will expire at {getExpiryTimeFromTimestamp(encryptTimestamp)}. After expiration, it cannot be decrypted.
+            This message will expire at {getExpiryTimeFromTimestamp(encryptTimestamp)}. 
+            <br />
+            <strong>✓ Can be decrypted within 1 minute</strong> - The encrypted text can be decrypted during the validity period.
             <br />
             <strong>Note:</strong> Each encryption of the same text produces different encrypted output due to different time slots and message indices.
           </>
@@ -105,6 +118,7 @@ export const EncryptTab: React.FC<EncryptTabProps> = ({
   encryptOutput,
   encryptTimeSlot,
   encryptTimestamp,
+  encryptMsgIndexUsed,
   decryptInput,
   decryptOutput,
   timeSlot,
@@ -157,7 +171,11 @@ export const EncryptTab: React.FC<EncryptTabProps> = ({
             )}
           </div>
           {encryptTimeSlot !== null && encryptTimestamp !== null && (
-            <EncryptionInfo timeSlot={encryptTimeSlot} encryptTimestamp={encryptTimestamp} />
+            <EncryptionInfo 
+              timeSlot={encryptTimeSlot} 
+              encryptTimestamp={encryptTimestamp}
+              msgIndex={encryptMsgIndexUsed}
+            />
           )}
           <div className="output-box">
             <pre className="terminal-text">{encryptOutput || '>>> Waiting for input...'}</pre>

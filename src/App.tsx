@@ -44,6 +44,7 @@ function App() {
   const [encryptOutput, setEncryptOutput] = useState('')
   const [encryptTimeSlot, setEncryptTimeSlot] = useState<number | null>(null)
   const [encryptTimestamp, setEncryptTimestamp] = useState<number | null>(null) // 实际加密时间戳
+  const [encryptMsgIndexUsed, setEncryptMsgIndexUsed] = useState<number | null>(null) // 加密时使用的msgIndex
   const [decryptInput, setDecryptInput] = useState('')
   const [decryptOutput, setDecryptOutput] = useState('')
   const [encryptMsgIndex, setEncryptMsgIndex] = useState(0)
@@ -148,6 +149,7 @@ function App() {
       setEncryptOutput(encrypted)
       setEncryptTimeSlot(currentTimeSlot)
       setEncryptTimestamp(encryptTime) // 记录加密时间戳
+      setEncryptMsgIndexUsed(encryptMsgIndex) // 记录使用的msgIndex
       setEncryptMsgIndex(encryptMsgIndex + 1)
     } catch (error) {
       setEncryptOutput(`>>> ERROR: ${error instanceof Error ? error.message : 'UNKNOWN ERROR'}`)
@@ -254,6 +256,7 @@ function App() {
           encryptOutput={encryptOutput}
           encryptTimeSlot={encryptTimeSlot}
           encryptTimestamp={encryptTimestamp}
+          encryptMsgIndexUsed={encryptMsgIndexUsed}
           decryptInput={decryptInput}
           decryptOutput={decryptOutput}
           timeSlot={timeSlot}
@@ -267,6 +270,7 @@ function App() {
             setEncryptOutput('')
             setEncryptTimeSlot(null)
             setEncryptTimestamp(null)
+            setEncryptMsgIndexUsed(null)
           }}
           onClearDecrypt={() => {
             setDecryptInput('')
