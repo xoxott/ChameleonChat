@@ -47,7 +47,40 @@ npm run preview
 
 项目已配置 GitHub Actions，自动部署到 GitHub Pages。
 
-访问地址: https://xoxott.github.io/ChameleonChat/
+### 自动部署
+
+每次推送到 `master` 分支时，GitHub Actions 会自动构建并部署到 GitHub Pages。
+
+### 手动部署
+
+1. **构建项目**:
+   ```bash
+   npm run build
+   ```
+
+2. **推送到 GitHub**:
+   ```bash
+   git add .
+   git commit -m "Deploy to GitHub Pages"
+   git push origin master
+   ```
+
+3. **或者使用 deploy 命令**:
+   ```bash
+   npm run deploy
+   git add .
+   git commit -m "Deploy to GitHub Pages"
+   git push origin master
+   ```
+
+### 访问地址
+
+部署完成后，访问: https://xoxott.github.io/ChameleonChat/
+
+> **注意**: 首次部署需要在 GitHub 仓库设置中启用 GitHub Pages：
+> 1. 进入仓库 Settings → Pages
+> 2. Source 选择 "GitHub Actions"
+> 3. 保存设置
 
 ## 技术栈
 
