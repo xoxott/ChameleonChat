@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react'
-import { encryptTextToChat, decryptChatToText } from './ChameleonChat'
+import { useState, useEffect, useRef } from 'react'
+import { encryptTextToChat, decryptChatToText, initRatchet, getCurrentRatchetTimeSlot } from './utils/chatCrypto'
 import { decryptWithRetry } from './utils/decryptUtils'
 import { createMessage, createErrorMessage, createSuccessMessage } from './utils/messageUtils'
 import { useTimeSlot } from './hooks/useTimeSlot'
 import { useCopy } from './hooks/useCopy'
-import { DEFAULT_MNEMONIC, DEFAULT_PASSPHRASE, DEFAULT_TIME_SLOT } from './constants'
+import { DEFAULT_MNEMONIC, DEFAULT_PASSPHRASE, getDefaultTimeSlot } from './constants'
 import { getCurrentTimeSlot } from './utils/timeUtils'
+import { syncTime } from './utils/syncTime'
 import { Message, TabType, Config } from './types'
 import { Header } from './components/Header'
 import { SettingsPanel } from './components/SettingsPanel'
@@ -28,17 +29,22 @@ function App() {
   const [config, setConfig] = useState<Config>({
     mnemonic: DEFAULT_MNEMONIC,
     passphrase: DEFAULT_PASSPHRASE,
-    timeSlot: DEFAULT_TIME_SLOT,
+    timeSlot: getDefaultTimeSlot(),
     manualTimeSlot: null
   })
 
   // 时间槽管理
-  const { timeSlot, manualTimeSlot, setTimeSlot, setManualTimeSlot } = useTimeSlot(DEFAULT_TIME_SLOT)
+  const { timeSlot, manualTimeSlot, setTimeSlot, setManualTimeSlot } = useTimeSlot(getDefaultTimeSlot())
 
   // 同步时间槽到配置
   useEffect(() => {
     setConfig(prev => ({ ...prev, timeSlot, manualTimeSlot }))
   }, [timeSlot, manualTimeSlot])
+
+  // 统一时间源：应用加载时后台同步，减少首次加密时的等待
+  useEffect(() => {
+    syncTime().catch(() => {})
+  }, [])
 
   // 加密工具状态
   const [encryptInput, setEncryptInput] = useState('')
@@ -53,6 +59,8 @@ function App() {
 
   // 复制功能
   const { copySuccess, copyToClipboard } = useCopy()
+  const mountedRef = useRef(true)
+  useEffect(() => () => { mountedRef.current = false }, [])
 
   // 重置到默认配置
   const resetToDefaults = () => {
@@ -92,13 +100,8 @@ function App() {
 
     setIsProcessing(true)
     try {
-      const encryptedText = await encryptTextToChat({
-        mnemonic: config.mnemonic,
-        passphrase: config.passphrase,
-        plaintext: inputValue,
-        timeSlot: timeSlot,
-        msgIndex
-      })
+      await initRatchet(config.mnemonic, config.passphrase)
+      const encryptedText = await encryptTextToChat(inputValue, msgIndex)
 
       const currentMsgIndex = msgIndex
       const newMessage = createMessage(inputValue, 'user', encryptedText)
@@ -107,20 +110,17 @@ function App() {
       setMsgIndex(currentMsgIndex + 1)
       setIsProcessing(false)
 
-      // 自动解密演示
+      // 自动解密演示（延迟避免阻塞 UI）
       setTimeout(async () => {
         try {
-          const decryptedText = await decryptWithRetry(
-            {
-              mnemonic: config.mnemonic,
-              passphrase: config.passphrase,
-              chatText: encryptedText
-            },
-            timeSlot
-          )
-          setMessages(prev => [...prev, createSuccessMessage(`DECRYPTION SUCCESS\n>>> MESSAGE: "${decryptedText}"`)])
+          const decryptedText = await decryptWithRetry(encryptedText)
+          if (mountedRef.current) {
+            setMessages(prev => [...prev, createSuccessMessage(`DECRYPTION SUCCESS\n>>> MESSAGE: "${decryptedText}"`)])
+          }
         } catch (error) {
-          setMessages(prev => [...prev, createErrorMessage(error instanceof Error ? error.message : 'UNKNOWN ERROR')])
+          if (mountedRef.current) {
+            setMessages(prev => [...prev, createErrorMessage(error instanceof Error ? error.message : 'UNKNOWN ERROR')])
+          }
         }
       }, 500)
     } catch (error) {
@@ -138,15 +138,10 @@ function App() {
 
     setIsProcessing(true)
     try {
-      const currentTimeSlot = getCurrentTimeSlot()
-      const encryptTime = Date.now() // 记录实际加密时间戳
-      const encrypted = await encryptTextToChat({
-        mnemonic: config.mnemonic,
-        passphrase: config.passphrase,
-        plaintext: encryptInput,
-        timeSlot: currentTimeSlot,
-        msgIndex: encryptMsgIndex
-      })
+      await initRatchet(config.mnemonic, config.passphrase)
+      const currentTimeSlot = getCurrentRatchetTimeSlot() ?? getCurrentTimeSlot()
+      const encryptTime = Date.now()
+      const encrypted = await encryptTextToChat(encryptInput, encryptMsgIndex)
       setEncryptOutput(encrypted)
       setEncryptTimeSlot(currentTimeSlot)
       setEncryptTimestamp(encryptTime) // 记录加密时间戳
@@ -168,14 +163,8 @@ function App() {
 
     setIsProcessing(true)
     try {
-      const decrypted = await decryptWithRetry(
-        {
-          mnemonic: config.mnemonic,
-          passphrase: config.passphrase,
-          chatText: decryptInput
-        },
-        timeSlot
-      )
+      await initRatchet(config.mnemonic, config.passphrase)
+      const decrypted = await decryptWithRetry(decryptInput)
       setDecryptOutput(decrypted)
     } catch (error) {
       setDecryptOutput(`>>> ERROR: ${error instanceof Error ? error.message : 'UNKNOWN ERROR'}\n>>> Tried multiple time slots and msg indices but decryption failed`)
@@ -184,26 +173,15 @@ function App() {
     }
   }
 
-  // 解密消息
-  const handleDecryptMessage = async (encryptedText: string, messageId: number) => {
+  // 解密消息（Ratchet 内部会尝试当前槽与上一槽 + msgIndex 0..10）
+  const handleDecryptMessage = async (encryptedText: string, _messageId?: number) => {
     if (!config.mnemonic.trim()) {
       setMessages(prev => [...prev, createErrorMessage('MNEMONIC NOT SET')])
       return
     }
-
-    const userMessages = messages.filter(m => m.sender === 'user' && m.encryptedText)
-    const msgIdx = userMessages.findIndex(m => m.id === messageId)
-
-    if (msgIdx === -1) return
-
     try {
-      const decrypted = await decryptChatToText({
-        mnemonic: config.mnemonic,
-        passphrase: config.passphrase,
-        chatText: encryptedText,
-        timeSlot: timeSlot,
-        msgIndex: msgIdx
-      })
+      await initRatchet(config.mnemonic, config.passphrase)
+      const decrypted = await decryptChatToText(encryptedText)
       setMessages(prev => [...prev, createSuccessMessage(`DECRYPTION RESULT: "${decrypted}"`)])
     } catch (error) {
       setMessages(prev => [...prev, createErrorMessage(`DECRYPTION FAILED: ${error instanceof Error ? error.message : 'UNKNOWN ERROR'}`)])
@@ -215,7 +193,7 @@ function App() {
       <div className="scanline"></div>
       <div className="noise"></div>
 
-      <Header timeSlot={timeSlot} />
+      <Header timeSlot={getCurrentRatchetTimeSlot() ?? timeSlot} />
 
       {showSettings && (
         <SettingsPanel
@@ -260,7 +238,7 @@ function App() {
           encryptMsgIndexUsed={encryptMsgIndexUsed}
           decryptInput={decryptInput}
           decryptOutput={decryptOutput}
-          timeSlot={timeSlot}
+          timeSlot={getCurrentRatchetTimeSlot() ?? timeSlot}
           isProcessing={isProcessing}
           onEncryptInputChange={setEncryptInput}
           onDecryptInputChange={setDecryptInput}

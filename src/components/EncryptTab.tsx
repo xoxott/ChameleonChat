@@ -102,7 +102,7 @@ const EncryptionInfo: React.FC<{
           <>
             This message will expire at {getExpiryTimeFromTimestamp(encryptTimestamp)}. 
             <br />
-            <strong>✓ Can be decrypted within 1 minute</strong> - The encrypted text can be decrypted during the validity period.
+            <strong>✓ Can be decrypted within about 2 minutes</strong> - The encrypted text can be decrypted during the validity period.
             <br />
             <strong>Note:</strong> Each encryption of the same text produces different encrypted output due to different time slots and message indices.
           </>

@@ -21,7 +21,7 @@ export const ChatTab: React.FC<ChatTabProps> = ({
   onCopy,
   onDecryptMessage
 }) => {
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       onSend()
@@ -52,7 +52,7 @@ export const ChatTab: React.FC<ChatTabProps> = ({
           type="text"
           value={inputValue}
           onChange={(e) => onInputChange(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           placeholder="Type message..."
           className="message-input terminal-input"
         />

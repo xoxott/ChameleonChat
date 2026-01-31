@@ -51,10 +51,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               value={config.manualTimeSlot !== null ? config.manualTimeSlot : config.timeSlot}
               onChange={(e) => {
                 const value = e.target.value ? parseInt(e.target.value) : null
-                onConfigChange({ manualTimeSlot: value })
-                if (value !== null) {
-                  onConfigChange({ timeSlot: value })
-                }
+                onConfigChange(value !== null ? { manualTimeSlot: value, timeSlot: value } : { manualTimeSlot: null })
               }}
               className="terminal-input"
               placeholder={`Auto: ${getCurrentTimeSlot()}`}
@@ -62,10 +59,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <span className="setting-hint">(Default: Auto-updated per minute. You can set a fixed value manually)</span>
             {config.manualTimeSlot !== null && (
               <button
-                onClick={() => {
-                  onConfigChange({ manualTimeSlot: null })
-                  onConfigChange({ timeSlot: getCurrentTimeSlot() })
-                }}
+                onClick={() => onConfigChange({ manualTimeSlot: null })}
                 className="terminal-btn secondary"
                 style={{ marginTop: '0.5rem', width: '100%', fontSize: '0.85rem', padding: '0.5rem' }}
               >

@@ -1,14 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 export function useCopy() {
   const [copySuccess, setCopySuccess] = useState<string | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
 
   const copyToClipboard = async (text: string, type: string) => {
     try {
       await navigator.clipboard.writeText(text)
       showSuccess(`${type} copied!`)
-    } catch (error) {
-      // 降级方案：使用传统方法
+    } catch {
       const textArea = document.createElement('textarea')
       textArea.value = text
       textArea.style.position = 'fixed'
@@ -18,7 +24,7 @@ export function useCopy() {
       try {
         document.execCommand('copy')
         showSuccess(`${type} copied!`)
-      } catch (err) {
+      } catch {
         showSuccess('Copy failed')
       }
       document.body.removeChild(textArea)
@@ -26,8 +32,12 @@ export function useCopy() {
   }
 
   const showSuccess = (message: string) => {
+    if (timerRef.current) clearTimeout(timerRef.current)
     setCopySuccess(message)
-    setTimeout(() => setCopySuccess(null), 2000)
+    timerRef.current = setTimeout(() => {
+      setCopySuccess(null)
+      timerRef.current = null
+    }, 2000)
   }
 
   return { copySuccess, copyToClipboard }

@@ -1,11 +1,13 @@
 import { Message } from '../types'
 
+let messageIdCounter = 0
+
 export const createMessage = (
   text: string,
   sender: Message['sender'],
   encryptedText?: string
 ): Message => ({
-  id: Date.now(),
+  id: ++messageIdCounter,
   text,
   encryptedText,
   sender,
