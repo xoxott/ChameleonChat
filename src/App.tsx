@@ -6,7 +6,6 @@ import { useTimeSlot } from './hooks/useTimeSlot'
 import { useCopy } from './hooks/useCopy'
 import { DEFAULT_MNEMONIC, DEFAULT_PASSPHRASE, getDefaultTimeSlot } from './constants'
 import { getCurrentTimeSlot } from './utils/timeUtils'
-import { syncTime } from './utils/syncTime'
 import { Message, TabType, Config } from './types'
 import { Header } from './components/Header'
 import { SettingsPanel } from './components/SettingsPanel'
@@ -40,11 +39,6 @@ function App() {
   useEffect(() => {
     setConfig(prev => ({ ...prev, timeSlot, manualTimeSlot }))
   }, [timeSlot, manualTimeSlot])
-
-  // 统一时间源：应用加载时后台同步，减少首次加密时的等待
-  useEffect(() => {
-    syncTime().catch(() => {})
-  }, [])
 
   // 加密工具状态
   const [encryptInput, setEncryptInput] = useState('')

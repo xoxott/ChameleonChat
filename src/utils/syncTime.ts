@@ -1,68 +1,48 @@
 /**
- * 统一时间源：从公共时间 API 同步时间，避免不同设备本地时钟差异导致加解密时间槽不一致
+ * 本地时间源 + 时间回拨检测：检测到时钟被拨回则永久锁死本设备，
+ * 持久化锁标志、不再提供时间槽，本设备上任何人（含助记词）都无法再解密。
  */
 
 const SLOT_MS = 60 * 1000 // 1 分钟
+const ROLLBACK_LOCK_KEY = "chameleon_rollback_lock"
 
-/** 多源 fallback，任一成功即用 */
-const TIME_API_URLS = [
-  "https://worldtimeapi.org/api/timezone/Etc/UTC",
-  "https://worldtimeapi.org/api/ip",
-]
+/** 已观测到的最大时间槽，用于检测回拨 */
+let lastSeenTimeSlot: number = -1
 
-let offsetMs = 0
-let synced = false
+function isRollbackLocked(): boolean {
+  if (typeof localStorage === "undefined") return false
+  return localStorage.getItem(ROLLBACK_LOCK_KEY) !== null
+}
 
 /**
- * 从远程时间 API 拉取当前时间，计算与本机的偏移并缓存。
- * 失败时保持 offset=0（等价于用本地时间），不抛错。
+ * 检测到回拨时写入持久锁，之后本设备永远不再提供时间槽。
  */
-export async function syncTime(): Promise<void> {
-  const localBefore = Date.now()
-  for (const url of TIME_API_URLS) {
-    try {
-      const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(5000) })
-      if (!res.ok) continue
-      const data = (await res.json()) as { unixtime?: number; unixtime_ms?: number }
-      const serverMs = data.unixtime_ms ?? (data.unixtime != null ? data.unixtime * 1000 : NaN)
-      if (!Number.isFinite(serverMs)) continue
-      // 用请求前后本地时间的中间值近似“请求发出时刻”的本地时间，减小 RTT 影响
-      const localAfter = Date.now()
-      const localMid = (localBefore + localAfter) / 2
-      offsetMs = serverMs - localMid
-      synced = true
-      return
-    } catch {
-      continue
-    }
+function setRollbackLock(): void {
+  if (typeof localStorage !== "undefined") {
+    localStorage.setItem(ROLLBACK_LOCK_KEY, String(lastSeenTimeSlot))
   }
-  // 全部失败：不修改 offset，相当于继续用本地时间
 }
 
 /**
- * 若尚未同步则先执行一次 syncTime()，再返回基于统一时间源的当前时间槽。
- * 用于 initRatchet 等需要“当前槽”且必须用统一时间的场景。
+ * 基于本地时间计算当前时间槽。若曾检测到回拨（已锁）则直接抛 LOCKED_BY_ROLLBACK；
+ * 若本次发现回拨则持久化锁、抛 TIME_ROLLBACK_DETECTED，调用方清空密钥后本设备永久不可解密。
  */
-export async function getSyncedTimeSlotAsync(): Promise<number> {
-  if (!synced) await syncTime()
-  return getSyncedTimeSlot()
+export function getDetectedTimeSlot(): number {
+  if (isRollbackLocked()) {
+    throw new Error("LOCKED_BY_ROLLBACK")
+  }
+  const current = Math.floor(Date.now() / SLOT_MS)
+  if (current < lastSeenTimeSlot) {
+    setRollbackLock()
+    throw new Error("TIME_ROLLBACK_DETECTED")
+  }
+  lastSeenTimeSlot = current
+  return current
 }
 
 /**
- * 当前时间槽（基于已缓存的偏移，不发起请求）。
- * 未同步过时等价于本地时间槽。
+ * 异步形式，供 initRatchet 等调用；逻辑与 getDetectedTimeSlot 一致。
  */
-export function getSyncedTimeSlot(): number {
-  return Math.floor((Date.now() + offsetMs) / SLOT_MS)
-}
-
-/**
- * 统一时间源下的当前时间戳（毫秒），用于展示或其它逻辑。
- */
-export function getSyncedTimestamp(): number {
-  return Date.now() + offsetMs
-}
-
-export function isTimeSynced(): boolean {
-  return synced
+export async function getDetectedTimeSlotAsync(): Promise<number> {
+  return getDetectedTimeSlot()
 }
