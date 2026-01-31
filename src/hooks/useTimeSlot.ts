@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getCurrentTimeSlot } from '../constants'
+import { getCurrentTimeSlot } from '../utils/timeUtils'
 
 export function useTimeSlot(initialTimeSlot: number) {
   const [timeSlot, setTimeSlot] = useState(initialTimeSlot)

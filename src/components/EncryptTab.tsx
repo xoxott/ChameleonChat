@@ -4,7 +4,7 @@ import {
   getExpiryTimeFromTimestamp, 
   isExpiredFromTimestamp, 
   getTimeRemainingFromTimestamp 
-} from '../constants'
+} from '../utils/timeUtils'
 
 interface EncryptTabProps {
   encryptInput: string

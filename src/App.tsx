@@ -4,7 +4,8 @@ import { decryptWithRetry } from './utils/decryptUtils'
 import { createMessage, createErrorMessage, createSuccessMessage } from './utils/messageUtils'
 import { useTimeSlot } from './hooks/useTimeSlot'
 import { useCopy } from './hooks/useCopy'
-import { DEFAULT_MNEMONIC, DEFAULT_PASSPHRASE, DEFAULT_TIME_SLOT, getCurrentTimeSlot } from './constants'
+import { DEFAULT_MNEMONIC, DEFAULT_PASSPHRASE, DEFAULT_TIME_SLOT } from './constants'
+import { getCurrentTimeSlot } from './utils/timeUtils'
 import { Message, TabType, Config } from './types'
 import { Header } from './components/Header'
 import { SettingsPanel } from './components/SettingsPanel'
@@ -17,7 +18,7 @@ import './App.css'
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('chat')
   const [messages, setMessages] = useState<Message[]>([
-    createMessage('>>> SYSTEM INITIALIZED\n>>> CHAMELEON CHAT v2.0\n>>> ENCRYPTION MODULE LOADED', 'system')
+    createMessage('>>> SYSTEM INITIALIZED\n>>> CHAMELEON CHAT \n>>> ENCRYPTION MODULE LOADED', 'system')
   ])
   const [inputValue, setInputValue] = useState('')
   const [showSettings, setShowSettings] = useState(true)

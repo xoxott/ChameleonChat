@@ -1,5 +1,5 @@
 import { decryptChatToText, DecryptParams } from '../ChameleonChat'
-import { getCurrentTimeSlot } from '../constants'
+import { getCurrentTimeSlot } from './timeUtils'
 
 const MAX_MSG_INDEX = 10
 // 过期时间：60秒（1分钟）

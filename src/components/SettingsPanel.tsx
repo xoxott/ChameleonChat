@@ -1,6 +1,7 @@
 import React from 'react'
 import { Config } from '../types'
-import { DEFAULT_MNEMONIC, DEFAULT_PASSPHRASE, getCurrentTimeSlot } from '../constants'
+import { DEFAULT_MNEMONIC, DEFAULT_PASSPHRASE } from '../constants'
+import { getCurrentTimeSlot } from '../utils/timeUtils'
 
 interface SettingsPanelProps {
   config: Config
